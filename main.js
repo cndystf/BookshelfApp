@@ -1,4 +1,4 @@
-// id: string | number
+//id: string | number
 //title: string
 //author: string
 //year: number
@@ -7,8 +7,8 @@
 let books = [];
 const RENDER_EVENT = 'render-book';
 
-const SAVED_EVENT = 'saved-book'
-const LOCAL_KEY = 'book-key' 
+const SAVED_EVENT = 'saved-book';
+const LOCAL_KEY = 'book-key';
 
 function generateId() {
     return +new Date();
@@ -25,7 +25,7 @@ function generateBookObject(id, title, author, year, isCompleted) {
 }
 
 function findBook(bookId) {
-    for (bookItem of books) {
+    for (const bookItem of books) {
         if (bookItem.id === bookId) {
             return bookItem;
         }
@@ -34,7 +34,7 @@ function findBook(bookId) {
 }
 
 function findBookIndex(bookId) {
-    for (index in books) {
+    for (const index in books) {
         if (books[index].id === bookId) {
             return index;
         }
@@ -191,6 +191,7 @@ document.addEventListener('DOMContentLoaded', function () {
     searchForm.addEventListener('submit', function(event) {
         event.preventDefault();
         searchBook();
+        document.dispatchEvent(new Event (RENDER_EVENT));
     });
 
     if (isStorageExist()) {
@@ -206,7 +207,7 @@ document.addEventListener(RENDER_EVENT,function() {
     uncompletedBookList.innerHTML = '';
     completedBookList.innerHTML = '';
 
-    for (const bookItem of books) {
+    for (const bookItem of searchBook()) {
         const bookElement = makeBook(bookItem);
         if (!bookItem.isCompleted) {
             uncompletedBookList.append(bookElement);
@@ -218,30 +219,38 @@ document.addEventListener(RENDER_EVENT,function() {
 });
 
 //additional feature : search book
+// function searchBook() {
+//     const title = document.getElementById('searchBookTitle').value;
+//     const serializedData = localStorage.getItem(LOCAL_KEY);
+//     const data = JSON.parse(serializedData);
+//     const filterBooks = data.filter (function(book) {
+//         return book.title.toLowerCase().includes(title.toLowerCase()); //ignore case sensitive
+//     });
+//     if (filterBooks.length === 0) {
+//         alert('Not Found');
+//         return location.reload();
+//     }
+
+//     if (title !== '') {
+//         books = [];
+//         for (const book of filterBooks) {
+//             books.push(book);
+//         }
+//         document.dispatchEvent(new Event(RENDER_EVENT));
+//     }
+//     else {
+//         books = [];
+//         loadDataFromStorage();
+//     }
+// };
 function searchBook() {
     const title = document.getElementById('searchBookTitle').value;
-    const serializedData = localStorage.getItem(LOCAL_KEY);
-    const data = JSON.parse(serializedData);
-    const filterBooks = data.filter (function(book) {
-        return book.title.toLowerCase().includes(title.toLowerCase()); //ignore case sensitive
+    const filterBooks = books.filter(function(book) {
+        const bookName = book.title.toLowerCase();
+        return bookName.includes(title.toLowerCase());
     });
-    if (filterBooks.length === 0) {
-        alert('Not Found');
-        return location.reload();
-    }
-
-    if (title !== '') {
-        books = [];
-        for (const book of filterBooks) {
-            books.push(book);
-        }
-        document.dispatchEvent(new Event(RENDER_EVENT));
-    }
-    else {
-        books = [];
-        loadDataFromStorage();
-    }
-};
+    return filterBooks;
+}
 
 //local storage applied
 document.addEventListener(SAVED_EVENT, function () {
@@ -259,7 +268,7 @@ function saveData() {
 function isStorageExist() {
     if (typeof(Storage) === undefined) {
         alert('This Browser does not support Local Storage');
-    return false
+    return false;
     }
     return true;
 }
